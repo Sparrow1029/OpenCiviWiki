@@ -10,15 +10,21 @@
                     <!-- Populate Bills list -->
                     <div class="subtitle-lato">Bills I support</div>
                     <div class="row">
-                        {{# _.each(this.model.get('my_bills').supported_bills, function (bill) { }}
-                        <b>{{ bill.title }}</b>
-                        {{# }, this); }}
+                        <ul class="list-group">
+                            {{# _.each(this.model.get('my_bills').supported_bills, function (bill, index) { }}
+                            <li class="list-group-item support-bill-elem" id="support-bill-{{ index }}">{{ bill.title }}</li>
+                            {{# }, this); }}
+                        </ul>
+                        <button type="button" class="support-button btn btn-light" onclick="toggleText('support')">Show more</button>
                     </div>
                     <div class="subtitle-lato">Bills I oppose</div>
                     <div class="row">
-                        {{# _.each(this.model.get('my_bills').opposed_bills, function (bill) { }}
-                        <b>{{ bill.title }}</b>
-                        {{# }, this); }}
+                        <ul class="list-group">
+                            {{# _.each(this.model.get('my_bills').opposed_bills, function (bill, index) { }}
+                            <li class="list-group-item oppose-bill-elem" id="oppose-bill-{{ index }}">{{ bill.title }}</li>
+                            {{# }, this); }}
+                        </ul>
+                        <button type="button" class="oppose-button btn btn-light" onclick="toggleText('oppose')">Show more</button>
                     </div>
                 </div>
 
@@ -29,19 +35,40 @@
 
 
 <script>
-    var status = "less";
+    var isSupportBillCollapsed = true;
+    var isOpposedBillCollapsed = true;
 
-    function toggleText(billsArray) {
-        var text = "Here is some text that I want added to the HTML file";
-
-        if (status === "less") {
-            document.getElementById("textArea").innerHTML = text;
-            document.getElementById("toggleButton").innerText = "See Less";
-            status = "more";
-        } else if (status === "more") {
-            document.getElementById("textArea").innerHTML = "";
-            document.getElementById("toggleButton").innerText = "See More";
-            status = "less"
+    function modifyButtonAfterAction(billType){
+        if(billType === "oppose") {
+            isOpposedBillCollapsed = !isOpposedBillCollapsed;
+            variableToTrack = isOpposedBillCollapsed
+        } else {
+            isSupportBillCollapsed = !isSupportBillCollapsed;
+            variableToTrack = isSupportBillCollapsed
         }
+        var button = $("." + billType + "-button");
+        if(variableToTrack){
+            button.text('Show more')
+        } else {
+            button.text('Show less')
+        }
+    }
+
+    function toggleText(billType) {
+        modifyButtonAfterAction(billType);
+        var allElements = $('.' + billType +'-bill-elem');
+        var variableToTrack = isOpposedBillCollapsed;
+        if(billType === "support"){
+            variableToTrack = isSupportBillCollapsed;
+        }
+
+        var elementsToShow = allElements.filter(function() {
+            if(variableToTrack) {
+                return true;
+            }
+           return parseInt(this.id.replace(billType + '-bill-',''), 10) < 1;
+        });
+        allElements.hide();
+        elementsToShow.show();
     }
 </script>
